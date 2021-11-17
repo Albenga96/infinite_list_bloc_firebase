@@ -66,15 +66,20 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         .collection("notes")
         .doc("$startIndex")
         .get();
-    final querySnap = await FirebaseFirestore.instance
-        .collection("notes")
-        .startAfterDocument(documentSnapshot)
-        .limit(_postLimit)
-        .get();
-    return querySnap.docs.map((post) {
-      return Post(
-          id: post.id, title: post.data()["title"], body: post.data()["body"]);
-    }).toList();
+    if (documentSnapshot.exists) {
+      final querySnap = await FirebaseFirestore.instance
+          .collection("notes")
+          .startAtDocument(documentSnapshot)
+          .limit(_postLimit)
+          .get();
+      return querySnap.docs.map((post) {
+        return Post(
+            id: post.id,
+            title: post.data()["title"],
+            body: post.data()["body"]);
+      }).toList();
+    } else
+      return <Post>[];
   }
 
   /*Future<List<Post>> _fetchPost([int startIndex = 0]) async {
