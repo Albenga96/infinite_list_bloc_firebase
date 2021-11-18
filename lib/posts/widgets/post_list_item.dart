@@ -10,10 +10,13 @@ class PostListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Material(
-      child: ListTile(
-        leading: Text('${post.id}', style: textTheme.caption),
-        title: Text(post.title),
-        dense: true,
+      child: Card(
+        elevation: 8.0,
+        child: ListTile(
+          leading: Text('${post.id}', style: textTheme.caption),
+          title: Text(post.title),
+          dense: true,
+        ),
       ),
     );
   }
