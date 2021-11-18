@@ -74,9 +74,9 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           .get();
       return querySnap.docs.map((post) {
         return Post(
-            id: post.id,
-            title: post.data()["title"],
-            body: post.data()["body"]);
+          id: post.id,
+          title: post.data()["title"],
+        );
       }).toList();
     } else
       return <Post>[];
