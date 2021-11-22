@@ -10,7 +10,6 @@ import 'package:stream_transform/stream_transform.dart';
 part 'post_event.dart';
 part 'post_state.dart';
 
-const _postLimit = 2;
 const throttleDuration = Duration(milliseconds: 100);
 
 EventTransformer<E> throttleDroppable<E>(Duration duration) {
@@ -27,8 +26,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     );
   }
 
-  //final http.Client httpClient;
-
   Future<void> _onPostFetched(
     PostFetched event,
     Emitter<PostState> emit,
@@ -43,43 +40,23 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           hasReachedMax: false,
         ));
       }
-      final posts = await _fetchPosts(state.posts.length);
-      posts.isEmpty
-          ? emit(state.copyWith(hasReachedMax: true))
-          : emit(
-              state.copyWith(
-                status: PostStatus.success,
-                posts: List.of(state.posts)..addAll(posts),
-                hasReachedMax: false,
-              ),
-            );
     } catch (e) {
       print(e);
       emit(state.copyWith(status: PostStatus.failure));
     }
   }
 
-  Future<List<Post>> _fetchPosts([
-    int startIndex = 0,
-  ]) async {
-    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .collection("notes")
-        .doc("$startIndex")
-        .get();
-    if (documentSnapshot.exists) {
-      final querySnap = await FirebaseFirestore.instance
-          .collection("notes")
-          .startAtDocument(documentSnapshot)
-          .limit(_postLimit)
-          .get();
-      return querySnap.docs.map((post) {
+  Future<List<Post>> _fetchPosts() async {
+    final querySnap =
+        await FirebaseFirestore.instance.collection("notes").get();
+    return querySnap.docs.map(
+      (post) {
         return Post(
           id: post.id,
           title: post.data()["title"],
         );
-      }).toList();
-    } else
-      return <Post>[];
+      },
+    ).toList();
   }
 
   /*Future<List<Post>> _fetchPost([int startIndex = 0]) async {
